@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>希尔排序 · 一键演示 | 可修改数据</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #eef2f7 0%, #d4dee8 100%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .shell-card {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35);
+            padding: 22px 24px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(120deg, #0c4a6e, #0284c7);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin: 0 0 0.2rem 0;
+        }
+
+        .sub {
+            color: #334155;
+            border-left: 4px solid #06b6d4;
+            padding-left: 14px;
+            margin: 8px 0 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 12px 20px;
+            border-radius: 60px;
+            margin-bottom: 24px;
+        }
+
+        .data-group {
+            display: flex;
+            gap: 8px;
+            background: white;
+            border-radius: 48px;
+            padding: 3px 8px 3px 18px;
+            border: 1px solid #cbd5e1;
+            align-items: center;
+        }
+        .data-group input {
+            border: none;
+            padding: 8px 0;
+            font-size: 0.9rem;
+            width: 240px;
+            outline: none;
+            font-family: monospace;
+            background: transparent;
+        }
+        .data-group button {
+            background: #e2e8f0;
+            border: none;
+            border-radius: 40px;
+            padding: 5px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .data-group button:hover {
+            background: #cbd5e1;
+        }
+
+        button {
+            background: #0f172a;
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #1e293b;
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: white;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-outline:hover {
+            background: #f8fafc;
+        }
+        .btn-primary {
+            background: #0891b2;
+        }
+        .btn-primary:hover {
+            background: #0e7490;
+        }
+        .btn-play.playing {
+            background: #dc2626;
+        }
+
+        .viz-panel {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 14px 10px 20px 10px;
+            margin: 12px 0 16px;
+            box-shadow: inset 0 1px 3px #00000008, 0 6px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .viz-container {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            min-height: 320px;
+            padding: 18px 12px 35px 12px;
+            overflow-x: auto;
+            background: #fefefe;
+            border-radius: 22px;
+        }
+
+        .card-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            flex-shrink: 0;
+            width: 48px;
+            margin-right: 8px;
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            z-index: 2;
+        }
+        @media (max-width: 700px) {
+            .card-wrapper { width: 36px; margin-right: 6px; }
+        }
+
+        .card {
+            width: 100%;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #3b82f6, #2563eb);
+            color: white;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .card .val {
+            font-size: 14px;
+            font-weight: 700;
+            text-shadow: 0 1px 0 rgba(0,0,0,0.2);
+        }
+
+        .index-label {
+            position: absolute;
+            bottom: -22px;
+            font-size: 11px;
+            color: #475569;
+            font-weight: 500;
+            background: #eef2ff;
+            padding: 2px 6px;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        .card-wrapper.comparing .card {
+            background: linear-gradient(145deg, #f59e0b, #d97706);
+            transform: scale(1.05) translateY(-6px);
+            box-shadow: 0 8px 16px rgba(245,158,11,0.4);
+        }
+        .card-wrapper.swapping .card {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            animation: shakeSwap 0.35s ease-in-out;
+        }
+        .card-wrapper.sorted .card {
+            background: linear-gradient(145deg, #14b8a6, #0d9488);
+            opacity: 0.9;
+        }
+        .card-wrapper.gap-active .card {
+            background: linear-gradient(145deg, #a5f3fc, #06b6d4);
+            box-shadow: 0 0 0 2px #facc15, 0 6px 12px rgba(6,182,212,0.5);
+            transform: translateY(-2px);
+        }
+        .card-wrapper.insert-effect .card {
+            animation: insertPop 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+            background: #ec4899;
+        }
+
+        @keyframes shakeSwap {
+            0% { transform: translateX(0); }
+            30% { transform: translateX(-5px); }
+            70% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes insertPop {
+            0% { transform: scale(1) translateY(0); background: #f472b6; }
+            40% { transform: scale(1.15) translateY(-18px); background: #f43f5e; }
+            100% { transform: scale(1) translateY(0); background: #14b8a6; }
+        }
+
+        .info-panel {
+            background: #f1f5f9;
+            border-radius: 28px;
+            padding: 14px 20px;
+            margin-top: 16px;
+            text-align: center;
+        }
+        .step-desc {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #0f172a;
+            background: white;
+            display: inline-block;
+            padding: 7px 20px;
+            border-radius: 60px;
+            margin-bottom: 6px;
+            box-shadow: inset 0 0 0 1px #e2e8f0;
+        }
+        .step-counter {
+            font-size: 0.8rem;
+            color: #475569;
+            font-family: monospace;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 10px 0 5px;
+            font-size: 12px;
+        }
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #5b6e8c;
+            margin-top: 20px;
+        }
+        .gap-badge {
+            position: absolute;
+            top: 8px;
+            right: 16px;
+            background: #0891b2;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+<div class="shell-card">
+    <h1>🐚 希尔排序 · Shell Sort</h1>
+    <div class="sub">动态间隔分组插入 | 可随意修改数据，反复演示 | 上一步 / 下一步 / 自动播放</div>
+
+    <div class="toolbar">
+        <div class="data-group">
+            <input type="text" id="arrayInput" placeholder="例: 8, 3, 9, 7, 2, 5, 1, 6" value="8,3,9,7,2,5,1,6">
+            <button id="generateBtn">📊 生成并重置</button>
+        </div>
+        <button id="resetBtn" class="btn-outline">⟳ 重置当前</button>
+        <button id="prevBtn" class="btn-outline">◀ 上一步</button>
+        <button id="nextBtn" class="btn-outline">下一步 ▶</button>
+        <button id="playBtn" class="btn-play">▶ 自动播放</button>
+    </div>
+
+    <div class="viz-panel">
+        <div class="viz-container" id="vizShell"></div>
+        <div class="legend">
+            <span><span class="legend-dot" style="background:#3b82f6;"></span> 未处理</span>
+            <span><span class="legend-dot" style="background:#f59e0b;"></span> 比较中</span>
+            <span><span class="legend-dot" style="background:#ef4444;"></span> 交换/移动</span>
+            <span><span class="legend-dot" style="background:#06b6d4;"></span> 当前gap子序列</span>
+            <span><span class="legend-dot" style="background:#14b8a6;"></span> 已排序</span>
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <div class="step-desc" id="stepDesc">✨ 点击「生成并重置」或「下一步」开始希尔排序</div>
+        <div class="step-counter" id="stepCounter">步骤 0 / 0</div>
+    </div>
+    <footer>希尔排序: 按递减增量gap分组插入排序，逐渐形成全局有序，最终gap=1完成精细排序。</footer>
+</div>
+
+<script>
+    function generateShellSteps(originalArr) {
+        var steps = [];
+        var arr = originalArr.map(function(v, idx) {
+            return { value: v, id: idx, state: 'default' };
+        });
+        var n = arr.length;
+        if (n === 0) return steps;
+        steps.push(createSnapshot(arr, '📋 初始数组: [' + originalArr.join(', ') + ']', [], '', { gap: null }));
+
+        var gap = Math.floor(n / 2);
+        while (gap > 0) {
+            steps.push(createSnapshot(arr, '🔁 设置增量 gap = ' + gap, [], '', { gap: gap }));
+            
+            for (var i = gap; i < n; i++) {
+                var tempVal = arr[i].value;
+                var tempId = arr[i].id;
+                var j = i;
+                
+                var highlightArr = deepCopy(arr);
+                highlightArr[i].state = 'comparing';
+                steps.push(createSnapshot(highlightArr, '📌 准备插入 arr[' + i + '] = ' + tempVal + '  (gap=' + gap + ')', [i], 'gap-highlight', { gap: gap, currentIdx: i }));
+                
+                while (j - gap >= 0) {
+                    var compareVal = arr[j - gap].value;
+                    var compareArr = deepCopy(arr);
+                    compareArr[j].state = 'comparing';
+                    compareArr[j - gap].state = 'comparing';
+                    steps.push(createSnapshot(compareArr, '🔍 比较 arr[' + (j - gap) + ']=' + compareVal + ' 与 待插值 ' + tempVal, [j, j - gap], 'compare', { gap: gap, comparingIdx: j - gap, insertIdx: j }));
+                    
+                    if (compareVal > tempVal) {
+                        var moveArr = deepCopy(arr);
+                        moveArr[j] = { value: moveArr[j - gap].value, id: moveArr[j - gap].id, state: 'swapping' };
+                        moveArr[j - gap].state = 'swapping';
+                        steps.push(createSnapshot(moveArr, '📦 后移: arr[' + (j - gap) + '] → arr[' + j + ']', [j, j - gap], 'swap', { gap: gap }));
+                        
+                        arr[j] = { value: arr[j - gap].value, id: arr[j - gap].id, state: 'default' };
+                        j = j - gap;
+                        var afterMoveArr = deepCopy(arr);
+                        afterMoveArr[j].state = 'gap-active';
+                        steps.push(createSnapshot(afterMoveArr, '🕳️ 空位移动到索引 ' + j, [j], 'gap-highlight', { gap: gap }));
+                    } else {
+                        steps.push(createSnapshot(deepCopy(arr), '⏸️ 停止移动，准备插入', [j], 'compare', { gap: gap }));
+                        break;
+                    }
+                }
+                
+                var insertArr = deepCopy(arr);
+                insertArr[j] = { value: tempVal, id: tempId, state: 'insert-effect' };
+                steps.push(createSnapshot(insertArr, '✨ 将 ' + tempVal + ' 插入到索引 ' + j, [j], 'insert', { gap: gap }));
+                
+                arr[j] = { value: tempVal, id: tempId, state: 'default' };
+                steps.push(createSnapshot(deepCopy(arr), '✔️ 插入完成', [], '', { gap: gap }));
+            }
+            
+            var gapFinishedArr = deepCopy(arr);
+            steps.push(createSnapshot(gapFinishedArr, '✅ gap = ' + gap + ' 处理完毕', [], '', { gap: gap }));
+            gap = Math.floor(gap / 2);
+            if (gap === 0) break;
+        }
+        
+        var finalArr = arr.map(function(v) {
+            return { value: v.value, id: v.id, state: 'sorted' };
+        });
+        steps.push(createSnapshot(finalArr, '🏆 希尔排序完成！数组已升序', [], '', { gap: 0, final: true }));
+        return steps;
+    }
+    
+    function deepCopy(arr) {
+        return arr.map(function(item) {
+            return { value: item.value, id: item.id, state: item.state };
+        });
+    }
+    
+    function createSnapshot(array, description, focus, animation, extras) {
+        return {
+            array: deepCopy(array),
+            desc: description,
+            focus: focus || [],
+            animation: animation || '',
+            extras: extras || {}
+        };
+    }
+    
+    function parseInput(str) {
+        return str.split(/[,，\s]+/).map(function(s) { return s.trim(); }).filter(function(s) { return s !== ''; }).map(function(n) { return Number(n); }).filter(function(n) { return !isNaN(n); });
+    }
+    
+    var ShellVisualizer = function() {
+        var self = this;
+        this.container = document.getElementById('vizShell');
+        this.descEl = document.getElementById('stepDesc');
+        this.counterEl = document.getElementById('stepCounter');
+        this.arrayInput = document.getElementById('arrayInput');
+        this.generateBtn = document.getElementById('generateBtn');
+        this.resetBtn = document.getElementById('resetBtn');
+        this.prevBtn = document.getElementById('prevBtn');
+        this.nextBtn = document.getElementById('nextBtn');
+        this.playBtn = document.getElementById('playBtn');
+        
+        this.steps = [];
+        this.currentIdx = -1;
+        this.playing = false;
+        this.timer = null;
+        this.baseArrayRaw = [];
+        
+        this.bindEvents();
+        this.generateFromInput();
+    };
+    
+    ShellVisualizer.prototype.bindEvents = function() {
+        var self = this;
+        this.generateBtn.addEventListener('click', function() { self.generateFromInput(); });
+        this.resetBtn.addEventListener('click', function() { self.resetToCurrent(); });
+        this.prevBtn.addEventListener('click', function() { self.prevStep(); });
+        this.nextBtn.addEventListener('click', function() { self.nextStep(); });
+        this.playBtn.addEventListener('click', function() { self.togglePlay(); });
+    };
+    
+    ShellVisualizer.prototype.generateFromInput = function() {
+        this.stopAutoPlay();
+        var raw = parseInput(this.arrayInput.value);
+        if (raw.length === 0) {
+            this.descEl.innerText = '❌ 请输入有效数字 (例如: 8,3,9,7)';
+            return;
+        }
+        if (raw.length > 16) raw = raw.slice(0, 16);
+        this.baseArrayRaw = raw.slice();
+        this.steps = generateShellSteps(raw);
+        this.currentIdx = -1;
+        this.renderCurrentStep();
+        this.updateInfoText();
+    };
+    
+    ShellVisualizer.prototype.resetToCurrent = function() {
+        if (this.baseArrayRaw.length === 0) {
+            this.generateFromInput();
+            return;
+        }
+        this.stopAutoPlay();
+        this.steps = generateShellSteps(this.baseArrayRaw);
+        this.currentIdx = -1;
+        this.renderCurrentStep();
+        this.updateInfoText();
+    };
+    
+    ShellVisualizer.prototype.renderCurrentStep = function() {
+        if (!this.steps.length) {
+            this.container.innerHTML = '<div style="padding:40px;text-align:center">✨ 点击上方「生成并重置」开始</div>';
+            return;
+        }
+        if (this.currentIdx === -1) {
+            if (this.steps.length > 0) {
+                this.renderArrayState(this.steps[0].array, this.steps[0].extras);
+                this.descEl.innerText = this.steps[0].desc + ' —— 点击「下一步」观看过程';
+                this.counterEl.innerText = '步骤 0 / ' + this.steps.length;
+            }
+            return;
+        }
+        var step = this.steps[this.currentIdx];
+        if (step) {
+            this.renderArrayState(step.array, step.extras);
+            this.descEl.innerText = step.desc;
+            this.counterEl.innerText = '步骤 ' + (this.currentIdx + 1) + ' / ' + this.steps.length;
+        }
+    };
+    
+    ShellVisualizer.prototype.renderArrayState = function(arr, extras) {
+        this.container.innerHTML = '';
+        if (!arr.length) return;
+        var maxVal = Math.max.apply(null, arr.map(function(v) { return v.value; })) || 1;
+        var baseHeight = 200;
+        var self = this;
+        
+        arr.forEach(function(item, posIdx) {
+            var wrapper = document.createElement('div');
+            wrapper.className = 'card-wrapper';
+            var card = document.createElement('div');
+            card.className = 'card';
+            var h = Math.max(32, Math.round((item.value / maxVal) * baseHeight));
+            card.style.height = h + 'px';
+            var valSpan = document.createElement('span');
+            valSpan.className = 'val';
+            valSpan.textContent = item.value;
+            card.appendChild(valSpan);
+            wrapper.appendChild(card);
+            var idxSpan = document.createElement('div');
+            idxSpan.className = 'index-label';
+            idxSpan.textContent = posIdx;
+            wrapper.appendChild(idxSpan);
+            
+            if (item.state === 'comparing') wrapper.classList.add('comparing');
+            else if (item.state === 'swapping') wrapper.classList.add('swapping');
+            else if (item.state === 'sorted') wrapper.classList.add('sorted');
+            else if (item.state === 'gap-active') wrapper.classList.add('gap-active');
+            else if (item.state === 'insert-effect') wrapper.classList.add('insert-effect');
+            
+            if (extras && extras.gap && extras.gap > 0 && !extras.final) {
+                if ((extras.currentIdx !== undefined && posIdx === extras.currentIdx) ||
+                    (extras.comparingIdx !== undefined && (posIdx === extras.comparingIdx || posIdx === extras.insertIdx))) {
+                    if (!wrapper.classList.contains('comparing')) wrapper.classList.add('gap-active');
+                }
+            }
+            self.container.appendChild(wrapper);
+        });
+        
+        var oldBadge = this.container.querySelector('.gap-badge');
+        if (oldBadge) oldBadge.remove();
+        if (extras && extras.gap && extras.gap > 0 && !extras.final) {
+            var badge = document.createElement('div');
+            badge.className = 'gap-badge';
+            badge.innerText = '📐 当前 gap = ' + extras.gap;
+            this.container.appendChild(badge);
+        }
+    };
+    
+    ShellVisualizer.prototype.updateInfoText = function() {
+        if (this.currentIdx === -1 && this.steps.length) {
+            this.counterEl.innerText = '步骤 0 / ' + this.steps.length;
+            this.descEl.innerText = (this.steps[0]?.desc || '') + ' —— 就绪，点击下一步';
+        } else if (this.currentIdx >= 0 && this.steps.length) {
+            this.counterEl.innerText = '步骤 ' + (this.currentIdx + 1) + ' / ' + this.steps.length;
+        }
+    };
+    
+    ShellVisualizer.prototype.nextStep = function() {
+        if (!this.steps.length) {
+            this.generateFromInput();
+            return;
+        }
+        if (this.currentIdx < this.steps.length - 1) {
+            this.currentIdx++;
+            this.renderCurrentStep();
+            this.updateInfoText();
+            if (this.currentIdx === this.steps.length - 1) this.stopAutoPlay();
+        } else {
+            this.stopAutoPlay();
+            this.descEl.innerText = '🎉 排序完成！可修改上方数据重新演示。';
+        }
+    };
+    
+    ShellVisualizer.prototype.prevStep = function() {
+        if (!this.steps.length) return;
+        if (this.currentIdx > 0) {
+            this.currentIdx--;
+            this.renderCurrentStep();
+            this.updateInfoText();
+            this.stopAutoPlay();
+        } else if (this.currentIdx === 0) {
+            this.currentIdx = -1;
+            this.renderCurrentStep();
+            this.updateInfoText();
+            this.stopAutoPlay();
+        }
+    };
+    
+    ShellVisualizer.prototype.togglePlay = function() {
+        if (this.playing) {
+            this.stopAutoPlay();
+        } else {
+            if (this.steps.length === 0) this.generateFromInput();
+            if (this.currentIdx >= this.steps.length - 1) {
+                this.currentIdx = -1;
+                this.renderCurrentStep();
+                this.updateInfoText();
+            }
+            this.startAutoPlay();
+        }
+    };
+    
+    ShellVisualizer.prototype.startAutoPlay = function() {
+        var self = this;
+        this.stopAutoPlay();
+        this.playing = true;
+        this.playBtn.innerHTML = '⏸ 暂停';
+        this.playBtn.classList.add('playing');
+        this.timer = setInterval(function() {
+            if (self.currentIdx < self.steps.length - 1) {
+                self.currentIdx++;
+                self.renderCurrentStep();
+                self.updateInfoText();
+                if (self.currentIdx === self.steps.length - 1) self.stopAutoPlay();
+            } else {
+                self.stopAutoPlay();
+            }
+        }, 850);
+    };
+    
+    ShellVisualizer.prototype.stopAutoPlay = function() {
+        if (this.timer) clearInterval(this.timer);
+        this.playing = false;
+        this.playBtn.innerHTML = '▶ 自动播放';
+        this.playBtn.classList.remove('playing');
+        this.timer = null;
+    };
+    
+    window.addEventListener('DOMContentLoaded', function() {
+        window.shellDemo = new ShellVisualizer();
+    });
+</script>
+</body>
+</html>
